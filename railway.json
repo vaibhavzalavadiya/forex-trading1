@@ -1,0 +1,15 @@
+
+  
+  {
+    "nixpacksPlan": {
+      "phases": {
+        "install": {
+          "cmds": ["pip install -r requirements.txt"]
+        },
+        "start": {
+          "cmd": "gunicorn forex_backtester.wsgi"
+        }
+      }
+    }
+  }
+  
