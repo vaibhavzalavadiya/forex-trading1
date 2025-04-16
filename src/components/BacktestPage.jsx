@@ -7,32 +7,48 @@ import TradeList from "./TradeList";
 
 const BacktestPage = () => {
   const [symbols, setSymbols] = useState({});
-  const [symbol, setSymbol] = useState("");
-  const [timeframe, setTimeframe] = useState("");
+  const [symbol, setSymbol] = useState("BTCUSDT");
+  const [timeframe, setTimeframe] = useState("DAY");
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSymbols = async () => {
       try {
+        setLoading(true);
         const response = await axios.get("https://forex-trading-2.onrender.com/get_symbols/");
         setSymbols(response.data);
   
         if (Object.keys(response.data).length > 0) {
-          const firstSymbol = Object.keys(response.data)[0];
-          setSymbol(firstSymbol);
-          setTimeframe(Object.keys(response.data[firstSymbol])[0]);
+          // Check if BTCUSDT exists in the response
+          if (response.data["BTCUSDT"]) {
+            setSymbol("BTCUSDT");
+            // Check if DAY timeframe exists for BTCUSDT
+            if (response.data["BTCUSDT"]["DAY"]) {
+              setTimeframe("DAY");
+            } else {
+              // Default to first available timeframe for BTCUSDT
+              setTimeframe(Object.keys(response.data["BTCUSDT"])[0]);
+            }
+          } else {
+            // Fall back to first available symbol and timeframe
+            const firstSymbol = Object.keys(response.data)[0];
+            setSymbol(firstSymbol);
+            setTimeframe(Object.keys(response.data[firstSymbol])[0]);
+          }
         }
+        setLoading(false);
       } catch (error) {
         console.error("❌ Error fetching symbols:", error);
+        setLoading(false);
       }
     };
   
     fetchSymbols();
   }, []);
 
-
   return (
-    <div className="trade-list container">
+    <div className="trade-list">
       <h2 className="text-center text-primary mb-4">Forex Backtest</h2>
 
       {/* Symbol and Timeframe Selectors */}
@@ -49,10 +65,15 @@ const BacktestPage = () => {
               setTimeframe(availableTimeframes.includes(timeframe) ? timeframe : availableTimeframes[0]);
               setPage(1);
             }}
+            disabled={loading}
           >
-            {Object.keys(symbols).map((sym) => (
-              <option key={sym} value={sym}>{sym}</option>
-            ))}
+            {loading ? (
+              <option value="">Loading...</option>
+            ) : (
+              Object.keys(symbols).map((sym) => (
+                <option key={sym} value={sym}>{sym}</option>
+              ))
+            )}
           </select>
 
           {/* Timeframe Dropdown */}
@@ -63,22 +84,30 @@ const BacktestPage = () => {
               setTimeframe(e.target.value);
               setPage(1);
             }}
-            disabled={!symbol}
+            disabled={loading || !symbol}
           >
-            {symbols[symbol] &&
+            {loading ? (
+              <option value="">Loading...</option>
+            ) : (
+              symbols[symbol] &&
               Object.keys(symbols[symbol]).map((tf) => (
                 <option key={tf} value={tf}>{tf}</option>
-              ))}
+              ))
+            )}
           </select>
         </div>
       </div>
 
       {/* Render Chart and Table Together */}
-      {symbol && timeframe && (
-        <>
-          {/* <BacktestChart symbol={symbol} timeframe={timeframe} page={page} setPage={setPage} /> */}
-          <TradeList symbol={symbol} timeframe={timeframe} page={page} setPage={setPage} />
-        </>
+      {symbol && timeframe ? (
+        <TradeList symbol={symbol} timeframe={timeframe} page={page} setPage={setPage} />
+      ) : (
+        <div className="text-center my-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-2">Loading data...</p>
+        </div>
       )}
     </div>
   );
