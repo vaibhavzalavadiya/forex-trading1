@@ -4,6 +4,9 @@ import { Container, Navbar } from "react-bootstrap";
 import BacktestPage from "./components/BacktestPage";
 // import BacktestChart from "./components/BacktestChart";
 import ErrorBoundary from "./components/ErrorBoundary";
+import './assets/css/style.css'
+import './assets/css/responsive.css'
+
 
 function App() {
   return (
@@ -17,7 +20,7 @@ function App() {
         </Navbar>
 
         {/* ✅ Main Content */}
-        <Container className="flex-grow-1">
+        <Container className="flex-grow-1 p-3">
           <ErrorBoundary>
             <Routes>
               <Route path="/" element={<BacktestPage />} />

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import TradeList from "./TradeList";
-// import BacktestChart from "./BacktestChart";
+import { Container, Row, Col, Form, Card, Spinner } from "react-bootstrap";
 
 const BacktestPage = () => {
   const [symbols, setSymbols] = useState({});
@@ -47,69 +47,88 @@ const BacktestPage = () => {
     fetchSymbols();
   }, []);
 
-  return (
-    <div className="trade-list">
-      <h2 className="text-center text-primary mb-4">Forex Backtest</h2>
-
-      {/* Symbol and Timeframe Selectors */}
-      <div className="card mx-auto mb-4 p-3 shadow" style={{ maxWidth: "500px" }}>
-        <div className="d-flex flex-wrap justify-content-center gap-3">
-          {/* Symbol Dropdown */}
-          <select
-            className="form-select w-auto"
-            value={symbol}
-            onChange={(e) => {
-              const newSymbol = e.target.value;
-              setSymbol(newSymbol);
-              const availableTimeframes = Object.keys(symbols[newSymbol] || {});
-              setTimeframe(availableTimeframes.includes(timeframe) ? timeframe : availableTimeframes[0]);
-              setPage(1);
-            }}
-            disabled={loading}
-          >
-            {loading ? (
-              <option value="">Loading...</option>
-            ) : (
-              Object.keys(symbols).map((sym) => (
-                <option key={sym} value={sym}>{sym}</option>
-              ))
-            )}
-          </select>
-
-          {/* Timeframe Dropdown */}
-          <select
-            className="form-select w-auto"
-            value={timeframe}
-            onChange={(e) => {
-              setTimeframe(e.target.value);
-              setPage(1);
-            }}
-            disabled={loading || !symbol}
-          >
-            {loading ? (
-              <option value="">Loading...</option>
-            ) : (
-              symbols[symbol] &&
-              Object.keys(symbols[symbol]).map((tf) => (
-                <option key={tf} value={tf}>{tf}</option>
-              ))
-            )}
-          </select>
-        </div>
+  return (  
+    <section className="main-section">
+      <div className="text-center mb-4">
+        <h1 className="display-5 fw-bold text-primary">Forex Strategy Backtester</h1>
+        <p className="lead text-secondary">Analyze historical trading performance with precision</p>
       </div>
 
-      {/* Render Chart and Table Together */}
-      {symbol && timeframe ? (
-        <TradeList symbol={symbol} timeframe={timeframe} page={page} setPage={setPage} />
-      ) : (
-        <div className="text-center my-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p className="mt-2">Loading data...</p>
-        </div>
-      )}
-    </div>
+      {/* Symbol and Timeframe Selectors */}
+      <Card className="shadow-sm mb-4 mx-auto" style={{ maxWidth: "800px" }}>
+        <Card.Body>
+          <Row className="justify-content-center g-3">
+            {/* Symbol Dropdown */}
+            <Col xs={12} md={6}>
+              <Form.Group>
+                <Form.Label className="fw-bold">
+                  <i className="bi bi-currency-exchange me-1"></i> Trading Pair
+                </Form.Label>
+                <Form.Select
+                  value={symbol}
+                  onChange={(e) => {
+                    const newSymbol = e.target.value;
+                    setSymbol(newSymbol);
+                    const availableTimeframes = Object.keys(symbols[newSymbol] || {});
+                    setTimeframe(availableTimeframes.includes(timeframe) ? timeframe : availableTimeframes[0]);
+                    setPage(1);
+                  }}
+                  disabled={loading}
+                  className="form-select-lg"
+                >
+                  {loading ? (
+                    <option value="">Loading symbols...</option>
+                  ) : (
+                    Object.keys(symbols).map((sym) => (
+                      <option key={sym} value={sym}>{sym}</option>
+                    ))
+                  )}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+
+            {/* Timeframe Dropdown */}
+            <Col xs={12} md={6}>
+              <Form.Group>
+                <Form.Label className="fw-bold">
+                  <i className="bi bi-calendar-range me-1"></i> Timeframe
+                </Form.Label>
+                <Form.Select
+                  value={timeframe}
+                  onChange={(e) => {
+                    setTimeframe(e.target.value);
+                    setPage(1);
+                  }}
+                  disabled={loading || !symbol}
+                  className="form-select-lg"
+                >
+                  {loading ? (
+                    <option value="">Loading timeframes...</option>
+                  ) : (
+                    symbols[symbol] &&
+                    Object.keys(symbols[symbol]).map((tf) => (
+                      <option key={tf} value={tf}>{tf}</option>
+                    ))
+                  )}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
+
+      {/* Results Section */}
+      <Card className="shadow mx-auto" style={{ maxWidth: "1200px" }}>
+        {symbol && timeframe ? (
+          <TradeList symbol={symbol} timeframe={timeframe} page={page} setPage={setPage} />
+        ) : (
+          <Card.Body className="text-center py-5">
+            <Spinner animation="border" variant="primary" className="mb-3" style={{ width: "3rem", height: "3rem" }} />
+            <p className="mb-0 lead">Loading trade data...</p>
+          </Card.Body>
+        )}
+      </Card>
+    </section>
   );
 };
 

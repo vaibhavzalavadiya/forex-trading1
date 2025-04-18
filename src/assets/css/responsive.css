@@ -1,0 +1,8 @@
+@media screen and (max-width:575px) {
+    h1{
+        font-size: 22px !important;
+    }
+    h3{
+        font-size: 18px !important;
+    }
+}
